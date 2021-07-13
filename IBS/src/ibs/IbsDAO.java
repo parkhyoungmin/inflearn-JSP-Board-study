@@ -107,4 +107,26 @@ public class IbsDAO {
 		return false;
 	}
 	
+	public Ibs getIbs(int ibsID) {
+		String SQL = "SELECT * FROM IBS WHERE ibsID = ?";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, ibsID);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				Ibs ibs = new Ibs();
+				ibs.setIbsID(rs.getInt(1));
+				ibs.setIbsTitle(rs.getString(2));
+				ibs.setUserID(rs.getString(3));
+				ibs.setIbsDate(rs.getString(4));
+				ibs.setIbsContent(rs.getString(5));
+				ibs.setIbsAvailable(rs.getInt(6));
+				return ibs;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 }

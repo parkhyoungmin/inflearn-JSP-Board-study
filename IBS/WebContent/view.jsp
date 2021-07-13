@@ -1,9 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="ibs.IbsDAO" %>
 <%@ page import="ibs.Ibs" %>
-<%@ page import="java.util.ArrayList" %>
+<%@ page import="ibs.IbsDAO" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,12 +10,6 @@
 <meta name="viewport" content="width=device-width", initial-scale="1">
 <link rel="stylesheet" href="css/bootstrap.css">
 <title>JSP 게시판 웹 사이트</title>
-<style type="text/css">
-	a, a:hover {
-		color: #000000;
-		text-decoration: none;
-	}
-</style>
 </head>
 <body>
 	<%
@@ -24,10 +17,18 @@
 		if (session.getAttribute("userID") != null) {
 			userID = (String) session.getAttribute("userID");
 		}
-		int pageNumber = 1;
-		if (request.getParameter("pageNumber") != null) {
-			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+		int ibsID = 0;
+		if (request.getParameter("ibsID") != null) {
+			ibsID = Integer.parseInt(request.getParameter("ibsID"));
 		}
+		if (ibsID == 0) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('유효하지 않은 글입니다.')");
+			script.println("location.href = 'ibs.jsp'");
+			script.println("</script>");
+		}
+		Ibs ibs = new IbsDAO().getIbs(ibsID);
 	%>
 	<nav class="navbar navbar-default">
 		<div class="navbar-header">
@@ -82,41 +83,38 @@
 			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
-						<th style="background-color: #eeeeee; text-align: center;">번호</th>
-						<th style="background-color: #eeeeee; text-align: center;">제목</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
+						<th colspan="3" style="background-color: #eeeeee; text-align: center;">게시판 글보기</th>
 					</tr>
 				</thead>
 				<tbody>
-					<%
-						IbsDAO ibsDAO = new IbsDAO();
-						ArrayList<Ibs> list = ibsDAO.getList(pageNumber);
-						for (int i = 0; i < list.size(); i++) {	
-					%>
 					<tr>
-						<td><%= list.get(i).getIbsID() %></td>
-						<td><a href="view.jsp?ibsID=<%= list.get(i).getIbsID() %>"><%= list.get(i).getIbsTitle().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>") %></a></td>
-						<td><%= list.get(i).getUserID() %></td>
-						<td><%= list.get(i).getIbsDate().substring(0, 11) + list.get(i).getIbsDate().substring(11, 13) + "시" + list.get(i).getIbsDate().substring(14, 16) + "분" %></td>
+						<td style="width: 20%;">글 제목</td>
+						<td colspan="2"><%= ibs.getIbsTitle().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>") %></td>
 					</tr>
-					<%
-						}
-					%>
+					<tr>
+						<td>작성자</td>
+						<td colspan="2"><%= ibs.getUserID() %></td>
+					</tr>
+					<tr>
+						<td>작성일자</td>
+						<td colspan="2"><%= ibs.getIbsDate().substring(0, 11) + ibs.getIbsDate().substring(11, 13) + "시" + ibs.getIbsDate().substring(14, 16) + "분" %></td>
+					</tr>
+					<tr>
+						<td>내용</td>
+						<td colspan="2" style="min-height: 200px; text-align: left;"><%= ibs.getIbsContent().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>") %></td>
+					</tr>
 				</tbody>
 			</table>
+			<a href="ibs.jsp" class="btn btn-primary">목록</a>
 			<%
-				if (pageNumber != 1) {
+				if (userID != null && userID.equals(ibs.getUserID())) {
 			%>
-				<a href="ibs.jsp?pageNumber=<%=pageNumber - 1%>" class="btn btn-success btn-arraw-left">이전</a>
+					<a href="update.jsp?ibsID=<%= ibsID %>" class="btn btn-primary">수정</a>
+					<a href="deleteAction.jsp?ibsID=<%= ibsID %>" class="btn btn-primary">삭제</a>
 			<%
-				} if (ibsDAO.nextPage(pageNumber + 1)) {
-			%>
-				<a href="ibs.jsp?pageNumber=<%=pageNumber + 1%>" class="btn btn-success btn-arraw-left">다음</a>
-			<%	
 				}
 			%>
-			<a href="write.jsp" class="btn btn-primary pull-right">글쓰기</a>
+			<input type="submit" class="btn btn-primary pull-right" value="글쓰기">
 		</div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
