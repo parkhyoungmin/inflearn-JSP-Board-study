@@ -129,4 +129,30 @@ public class IbsDAO {
 		return null;
 	}
 	
+	public int update(int ibsID, String ibsTitle, String ibsContent) {
+		String SQL = "UPDATE IBS SET ibsTitle = ?, ibsTitle = ? WHERE ibsID = ?";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setString(1, ibsTitle);
+			pstmt.setString(2, ibsContent);
+			pstmt.setInt(3, ibsID);
+			return pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	public int delete(int ibsID) {
+		String SQL = "UPDATE IBS SET ibsAvailable = 0 WHERE ibsID = ?";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, ibsID);
+			return pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
 }
